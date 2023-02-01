@@ -85,6 +85,7 @@ An optimal approach to testing would be integration at different levels of the h
 - **rely on auth / bookmark services** to be tested
 - check merely for calls on the service methods (as long as controller performs no additional logic)
 - possibly check validation, route guards etc.
+- check status codes & errors (+messages ?)
 - complex e2e scenarios to check for data consistency
   - signup, logout, login (probably tested at service level)
   - login route, then refresh token route, then logout, then cannot refresh token route any more
