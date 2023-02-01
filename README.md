@@ -45,26 +45,52 @@ $ yarn run test:cov
     - -> Service
       - -> DBConnector or other tools (encryption libs, save to fs, make external calls etc.)
 
-An optimal approach to testing would be e2e at different levels of the hierarchy (but always go all the way down):
+An optimal approach to testing would be integration at different levels of the hierarchy (but always go all the way down):
 
-Run a test DB for all tests below
+### 📝 _Integrated Unit Tests_
+
+> Run a **test DB** for all tests below
 
 1. prisma service: prisma itself is already tested
    - see if the cleanup works as expected
-2. e2e on the auth service (unit test + some value checks)
+2. service level
 
-- Use the real prisma service
-- **Rely on prisma service** being tested already
-- check that saved values are correct / check that external calls are made etc.
+   - test:
+
+     - auth service
+     - bookmarks service
+     - user service
+
+   - Use the real prisma service
+   - **Rely on prisma service** to be tested already
+   - perform value checks via scenarios (as in e2e):
+     - can it be retrieved after created?
+     - can an update be observed?
+     - can a delete be observed?
+     - can user credentials be used to login after used to sign up?
+
+- check that external calls are made (not in this app)
 - possibly mock some calls
   - like argon.hash(), since these provide different values each time
   - external calls
   - if external calls are typically awaited to return before returning from the unit call, the result can be checked for correctness
 
-3. e2e on the auth controller
-   - **rely on auth service** being tested
-   - create complex e2e scenarios and check that values are as expected:
-     - User saves via @Patch(), user reads via @Get() -> value is the upated one, as expected
+3. controller level
+   - test
+     - auth controller
+     - bookmarks controller
+     - users controller
+
+- use actual auth / bookmark / user services
+- **rely on auth / bookmark services** to be tested
+- check merely for calls on the service methods (as long as controller performs no additional logic)
+- possibly check validation, route guards etc.
+- complex e2e scenarios to check for data consistency
+  - signup, logout, login (probably tested at service level)
+  - login route, then refresh token route, then logout, then cannot refresh token route any more
+
+Checks for correct changes / returned values may be split up btw. service level & controller level.
+If service is tested to perform a correct update, and the controller is tested to call the service, we don't need to check for data consistency.
 
 ## Established patterns for testing
 
