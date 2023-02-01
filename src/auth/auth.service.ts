@@ -29,8 +29,8 @@ export class AuthService {
           hash,
         },
       });
-      const tokens = await this.tokenPayload(user.id, dto.email);
-      this.updateRtHash(user.id, tokens.refresh_token);
+      const tokens = await this._tokenPayload(user.id, dto.email);
+      this._updateRtHash(user.id, tokens.refresh_token);
       return tokens;
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
@@ -53,8 +53,8 @@ export class AuthService {
     if (!match) {
       throw new ForbiddenException('Credentials incorrect');
     }
-    const tokens = await this.tokenPayload(user.id, dto.email);
-    this.updateRtHash(user.id, tokens.refresh_token);
+    const tokens = await this._tokenPayload(user.id, dto.email);
+    this._updateRtHash(user.id, tokens.refresh_token);
     return tokens;
   }
 
@@ -81,12 +81,12 @@ export class AuthService {
     if (!matches) {
       throw new UnauthorizedException('Refreshtoken invalid');
     }
-    const tokens = this.tokenPayload(userId, user.email);
-    this.updateRtHash(userId, (await tokens).refresh_token);
+    const tokens = this._tokenPayload(userId, user.email);
+    this._updateRtHash(userId, (await tokens).refresh_token);
     return tokens;
   }
 
-  async updateRtHash(userId: number, rt: string) {
+  private async _updateRtHash(userId: number, rt: string) {
     const rtHash = await argon.hash(rt);
 
     await this.prisma.user.update({
@@ -95,7 +95,7 @@ export class AuthService {
     });
   }
 
-  async tokenPayload(userId: number, email: string): Promise<Tokens> {
+  private async _tokenPayload(userId: number, email: string): Promise<Tokens> {
     const data = { sub: userId, email };
     const [access_token, refresh_token] = await Promise.all([
       this.jwt.signAsync(data, {

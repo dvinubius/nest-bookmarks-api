@@ -1,0 +1,2 @@
+export const rtStub =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiZGludUBkaW51LmNvbSIsImlhdCI6MTY3NTIwMjg0MywiZXhwIjoxNjc1ODA3NjQzfQ.WBYNsG-6imH8gUJi3fvejG3qG2dCDSKFrT1g7t4IcGQ';

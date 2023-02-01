@@ -36,7 +36,40 @@ $ yarn run test:e2e
 $ yarn run test:cov
 ```
 
-## Takeaways
+## Takeaways on Testing
+
+- Mocking can become very tedious only to replicate elementary logic
+- Basic logic could also be tested by using the system as-is, but typically e2e tests execution control is "far away" from the intricacies at the unit levels.
+- Hierarchy:
+  - Controller Req-Resp
+    - -> Service
+      - -> DBConnector or other tools (encryption libs, save to fs, make external calls etc.)
+
+An optimal approach to testing would be e2e at different levels of the hierarchy (but always go all the way down):
+
+Run a test DB for all tests below
+
+1. prisma service: prisma itself is already tested
+   - see if the cleanup works as expected
+2. e2e on the auth service (unit test + some value checks)
+
+- Use the real prisma service
+- **Rely on prisma service** being tested already
+- check that saved values are correct / check that external calls are made etc.
+- possibly mock some calls
+  - like argon.hash(), since these provide different values each time
+  - external calls
+  - if external calls are typically awaited to return before returning from the unit call, the result can be checked for correctness
+
+3. e2e on the auth controller
+   - **rely on auth service** being tested
+   - create complex e2e scenarios and check that values are as expected:
+     - User saves via @Patch(), user reads via @Get() -> value is the upated one, as expected
+
+## Established patterns for testing
+
+> - applied to the current app / setup
+> - compiled from misc sources
 
 ### Unit tests
 
@@ -50,6 +83,8 @@ Design:
 
 - unit is a service / controller
 - unit-injected services are mocked
+- input values and outputs are mocked
+- function calls within the unit are spied on
 
 ### Integration tests
 
